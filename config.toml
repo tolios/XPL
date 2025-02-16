@@ -1,0 +1,14 @@
+[embedding_model]
+name = "jina/jina-embeddings-v2-small-en"
+api_url = "http://localhost:11434/api/embeddings"  # Replace with your actual embedding API endpoint
+
+[llm_model]
+name = "tinyllama:latest"
+api_url = "http://localhost:11434/api/generate"  # Replace with your actual LLM API endpoint
+
+[document_processing]
+chunk_size = 500  # Number of characters per chunk for embedding
+chroma_path = ".xplchroma"  # Directory to store all!
+
+[logging]
+level = "INFO"  # Logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
