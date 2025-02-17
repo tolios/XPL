@@ -4,23 +4,29 @@
 
 `xpl` is a command-line tool that helps you analyze and query documents using AI-powered embeddings and language models. It leverages local AI models for text generation and embeddings, combined with a vector database for efficient searching.
 
-### NOTE
+As a cli tool it aims to be used only as such. We do have now tons of implementations that are way better than this. :^)
+
+### Author's note
+
+This tool was/is made because I simply can't keep up with all the crazy developments around the world, and need a machine to lossy-say to me what happens. To not get out of my terminal...
+
+### ATTENTION
 For now it only uses ollama models. The aim would be to integrate many possible api's, or
-even custom embedding, and llms...
+even custom embedding, and llms..chmod +x xpl.
 
 ollama link: https://github.com/ollama/ollama
 
 ## Features
-- **Process Documents**: Extracts text from PDFs and generates embeddings.
+- **Process Documents**: Extracts text from ALL [markitdown](https://github.com/microsoft/markitdown) supported formats (the basic ones) and generates embeddings.
 - **Query Documents**: Ask questions about a document and get AI-powered responses.
-- **Manage Databases**: Store, retrieve, and delete document embeddings from a ChromaDB vector database.
+- **Manage Databases**: Store, retrieve, and delete document embeddings from a [ChromaDB](https://www.trychroma.com/) vector database.
 
 ## Installation
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/xpl.git
-   cd xpl
+   git clone https://github.com/tolios/XPL.git
+   cd XPL
    ```
 2. Install dependencies using Poetry:
    ```sh
@@ -33,7 +39,7 @@ ollama link: https://github.com/ollama/ollama
 
 ## Configuration
 
-`xpl` uses a `.conf` file (TOML format) for configuration. Default settings are in `lib/config.py`. To modify configurations, update the `.conf` file:
+`xpl` uses a `config.toml` file (TOML format) for configuration. Default settings are in `lib/config.py`. To modify configurations, update the file:
 ```toml
 EMBEDDING_MODEL = "jina/jina-embeddings-v2-small-en"
 LLM_MODEL = "deepseek-r1:1.5b"

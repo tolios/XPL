@@ -1,12 +1,12 @@
 import os
 import requests
-from pypdf import PdfReader
+from markitdown import MarkItDown
 from lib.config import CHUNK_SIZE, EMBEDDING_API_URL, EMBEDDING_MODEL
 from lib.db import initialize_chroma_client, get_or_create_collection
 import lib.utils
 import lib.exception as exception
 
-def extract_text_from_pdf(filepath):
+def extract_markdown(filepath):
     """
     Extracts text from a PDF file.
     
@@ -16,17 +16,13 @@ def extract_text_from_pdf(filepath):
     Returns:
         str: Extracted text.
     """
-    text = ""
     try:
-        reader = PdfReader(filepath)
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
+        md = MarkItDown()
+        doc = md.convert(filepath)
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
         raise e
-    return text
+    return doc.text_content
 
 def generate_embeddings(text_chunks):
     """
@@ -67,7 +63,7 @@ def process_document(filepath):
 
     # Extract text based on file type
     if filepath.lower().endswith(".pdf"):
-        text = extract_text_from_pdf(filepath)
+        text = extract_markdown(filepath)
     else:
         print(f"Unsupported file format: {filepath}")
         raise exception.UnsupportedFileTypeError

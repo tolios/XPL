@@ -2,3 +2,4 @@ __pycache__
 .venv
 *.pdf
 .xplchroma
+.DS_store
