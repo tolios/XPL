@@ -16,6 +16,9 @@ LLM_MODEL = config['llm_model']['name']
 LLM_API_URL = config['llm_model']['api_url']
 
 CHUNK_SIZE = config['document_processing']['chunk_size']
+OVERLAP = config['document_processing']['overlap'] 
 CHROMA_PATH = config['document_processing']['chroma_path']
+
+N_DOCS = config['query']['n_docs']
 
 LOGGING_LEVEL = config['logging']['level']

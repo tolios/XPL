@@ -3,12 +3,16 @@ name = "jina/jina-embeddings-v2-small-en"
 api_url = "http://localhost:11434/api/embeddings"  # Replace with your actual embedding API endpoint
 
 [llm_model]
-name = "tinyllama:latest"
+name = "qwen2.5:3b"
 api_url = "http://localhost:11434/api/generate"  # Replace with your actual LLM API endpoint
 
 [document_processing]
-chunk_size = 500  # Number of characters per chunk for embedding
+overlap = 50 # overlap between chunking of documents
+chunk_size = 150  # Number of characters per chunk for embedding
 chroma_path = ".xplchroma"  # Directory to store all!
+
+[query]
+n_docs = 10
 
 [logging]
 level = "INFO"  # Logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)

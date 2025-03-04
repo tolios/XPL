@@ -1,7 +1,7 @@
 import os
 import requests
 from markitdown import MarkItDown
-from lib.config import CHUNK_SIZE, EMBEDDING_API_URL, EMBEDDING_MODEL
+from lib.config import CHUNK_SIZE, OVERLAP, EMBEDDING_API_URL, EMBEDDING_MODEL
 from lib.db import initialize_chroma_client, get_or_create_collection
 import lib.utils
 import lib.exception as exception
@@ -82,7 +82,7 @@ def process_document(filepath):
         raise exception.AlreadyProcessed
 
     # Chunk text
-    text_chunks = lib.utils.chunk_text(text, CHUNK_SIZE)
+    text_chunks = lib.utils.chunk_text(text, CHUNK_SIZE, overlap=OVERLAP)
 
     # Generate embeddings
     embeddings = generate_embeddings(text_chunks)

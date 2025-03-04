@@ -1,6 +1,6 @@
 import os
 import requests
-from lib.config import EMBEDDING_API_URL, EMBEDDING_MODEL, LLM_API_URL, LLM_MODEL
+from lib.config import EMBEDDING_API_URL, EMBEDDING_MODEL, LLM_API_URL, LLM_MODEL, N_DOCS
 from lib.db import initialize_chroma_client
 
 def search_document(filepath, query_text):
@@ -21,10 +21,10 @@ def search_document(filepath, query_text):
     
     query_embedding = get_embedding(query_text)
     results = collection.query(
-        query_embeddings=[query_embedding], n_results=3
+        query_embeddings=[query_embedding], n_results=N_DOCS,
     )
-    
-    return "\n".join(doc for doc in results["documents"][0])
+
+    return "".join(f"{i+1}. "+doc+"\n" for i, doc in enumerate(results["documents"][0]))
 
 # defiend as well in processor.py - bad practice
 def get_embedding(text):
@@ -56,15 +56,23 @@ def answer_question(filepath, question):
         str: AI-generated response.
     """
     context = search_document(filepath, question)
-    prompt = f"Document Context:\n{context}\n\nUser Question: {question}\nAnswer:"
 
+    prompt = f'''
+    You are a chatbot tasked with answering the user question about a given document given
+    the document contexts. The contexts: \n{context} \nUser Question: {question}\n
+    Answer:
+    '''
+ 
     headers = {
         "Content-Type": "application/json"
     }
     response = requests.post(
         LLM_API_URL,
         headers=headers,
-        json={"model": LLM_MODEL, "prompt": prompt, "stream": False}
+        json={"model": LLM_MODEL, "prompt": prompt, "stream": False, 
+        "options": {
+            "temperature": 0
+        }}
     )
     response.raise_for_status()
     
