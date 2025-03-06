@@ -58,6 +58,10 @@ def get_or_create_collection(client, collection_name):
         existed = False
     return collection, existed
 
+def list_collections(folderpath):
+    client = PersistentClient(path=CHROMA_PATH,tenant='xpl', database=os.path.abspath(folderpath))
+    return client.list_collections()
+
 # ERROR FIX COMMENTED OUT 
 # def delete_database(database_name):
 #     """
@@ -87,8 +91,6 @@ def delete_collection(filename):
     collection_name = os.path.basename(filename)
     client = PersistentClient(path=CHROMA_PATH,tenant='xpl', database=db)
 
-    client.get_collection
-
     try:
         client.delete_collection(collection_name)
         print(f"Collection '{collection_name}' deleted successfully from database '{db}'.")
@@ -96,9 +98,9 @@ def delete_collection(filename):
         print(f"Error deleting collection '{collection_name}': {e}")
         raise e
 
-def db_exists(filename):
+def db_exists_for_file(filename):
     """
-    Checks if db exists...
+    Checks if db exists given a specific file...
     Args:
         finename (str): The file to be processed
     Returns:
@@ -108,6 +110,26 @@ def db_exists(filename):
     admin_client = AdminClient(settings=settings)
 
     db = os.path.dirname(os.path.abspath(filename)) 
+
+    for log in admin_client.list_databases(tenant='xpl'):
+        if log['name'] == db:
+            return True
+    
+    return False
+
+def db_exists(folderpath):
+    """
+    Checks if db exists for a folder
+    Args:
+        folderpath (str): The folder path
+    Returns:
+        exists (bool): True if the corresponding db exists...
+    """
+
+    settings = Settings(is_persistent=True, persist_directory=CHROMA_PATH)
+    admin_client = AdminClient(settings=settings)
+
+    db = os.path.abspath(folderpath) 
 
     for log in admin_client.list_databases(tenant='xpl'):
         if log['name'] == db:
