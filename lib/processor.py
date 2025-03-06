@@ -3,6 +3,7 @@ import requests
 from markitdown import MarkItDown
 from lib.config import CHUNK_SIZE, OVERLAP, EMBEDDING_API_URL, EMBEDDING_MODEL
 from lib.db import initialize_chroma_client, get_or_create_collection
+from lib.summary import get_summary
 import lib.utils
 import lib.exception as exception
 
@@ -62,12 +63,12 @@ def process_document(filepath):
         raise exception.FileNotFoundError
 
     # Extract text based on file type
-    if filepath.lower().endswith(".pdf"):
-        text = extract_markdown(filepath)
+    if filepath.lower().endswith(".pdf"): #needs to include all allowed markitdown files
+        text = extract_markdown(filepath) 
     else:
         print(f"Unsupported file format: {filepath}")
         raise exception.UnsupportedFileTypeError
-
+    
     if not text:
         print(f"No text extracted from {filepath}.")
         raise exception.ProcessingError
@@ -77,6 +78,11 @@ def process_document(filepath):
 
     # embedding the file
     collection, existed = get_or_create_collection(client, os.path.basename(filepath))
+
+    if not existed:
+        # getnadd summary
+        summary = get_summary(text)
+        collection.modify(metadata={'summary': summary})
 
     if existed:
         raise exception.AlreadyProcessed

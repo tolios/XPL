@@ -19,6 +19,10 @@ CHUNK_SIZE = config['document_processing']['chunk_size']
 OVERLAP = config['document_processing']['overlap'] 
 CHROMA_PATH = config['document_processing']['chroma_path']
 
+S_CHUNK_SIZE = config['summary']['chunk_size']
+S_OVERLAP = config['summary']['overlap'] 
+MAX_SUMMARY_LEN = config['summary']['max_summary_length']
+
 N_DOCS = config['query']['n_docs']
 
 LOGGING_LEVEL = config['logging']['level']

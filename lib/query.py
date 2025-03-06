@@ -12,7 +12,7 @@ def search_document(filepath, query_text):
         query_text (str): The user query.
     
     Returns:
-        str: Retrieved context from the document.
+        (Context, summary) (str, str): Retrieved context and summary from the document.
     """
     db = os.path.dirname(os.path.abspath(filepath))
     filename = os.path.basename(filepath)
@@ -24,7 +24,7 @@ def search_document(filepath, query_text):
         query_embeddings=[query_embedding], n_results=N_DOCS,
     )
 
-    return "".join(f"{i+1}. "+doc+"\n" for i, doc in enumerate(results["documents"][0]))
+    return "".join(f"{i+1}. "+doc+"\n" for i, doc in enumerate(results["documents"][0])), collection.metadata.get("summary", "no summary generated")
 
 # defiend as well in processor.py - bad practice
 def get_embedding(text):
@@ -55,12 +55,18 @@ def answer_question(filepath, question):
     Returns:
         str: AI-generated response.
     """
-    context = search_document(filepath, question)
+    context, summary = search_document(filepath, question)
 
     prompt = f'''
-    You are a chatbot tasked with answering the user question about a given document given
-    the document contexts. The contexts: \n{context} \nUser Question: {question}\n
-    Answer:
+    You are a chatbot tasked with answering the user question about a document given
+    the document contexts of the document, as well as the provided summary.
+    The summary: \n{summary} \nThe contexts: \n{context} \nUser Question: {question}\n
+
+    Generate a json with the following structure:
+    {
+        "answer" "The answer to the question asked by the user"
+    }
+
     '''
  
     headers = {
@@ -69,9 +75,11 @@ def answer_question(filepath, question):
     response = requests.post(
         LLM_API_URL,
         headers=headers,
-        json={"model": LLM_MODEL, "prompt": prompt, "stream": False, 
+        json={"model": LLM_MODEL, "prompt": prompt, "stream": False,
+        "format": "json",
         "options": {
-            "temperature": 0
+            "temperature": 0,
+            "num_ctx": 10000
         }}
     )
     response.raise_for_status()

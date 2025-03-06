@@ -14,5 +14,10 @@ chroma_path = ".xplchroma"  # Directory to store all!
 [query]
 n_docs = 10
 
+[summary]
+overlap = 50 # overlap between chunking of documents
+chunk_size = 3000  # Number of characters per chunk for rolling summary
+max_summary_length = 700 # max number of characters that the summary will be
+
 [logging]
 level = "INFO"  # Logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)

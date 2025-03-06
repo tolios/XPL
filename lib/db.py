@@ -44,6 +44,7 @@ def get_or_create_collection(client, collection_name):
         collection = client.get_collection(collection_name)
         existed = True
     except:
+        # summary here...
         collection = client.create_collection(
             name=collection_name,
             metadata = {
