@@ -1,7 +1,28 @@
 import os
 import requests
-from lib.config import EMBEDDING_API_URL, EMBEDDING_MODEL, LLM_API_URL, LLM_MODEL, N_DOCS
+from lib.config import EMBEDDING_API_URL, EMBEDDING_MODEL, LLM_API_URL, LLM_MODEL, N_DOCS, ALPHA, BM25_PATH
 from lib.db import initialize_chroma_client
+from lib.bm25 import BM25Retriever
+import numpy as np
+
+def min_max_normalize(arr):
+    """
+    Normalize a NumPy array to the range [0, 1] using Min-Max normalization.
+    
+    Args:
+        arr (np.ndarray): Input array of values.
+    
+    Returns:
+        np.ndarray: Normalized array with values between [0, 1].
+    """
+    arr = np.array(arr, dtype=np.float64)  # Ensure it's a NumPy array
+    min_val, max_val = np.min(arr), np.max(arr)
+    
+    # Avoid division by zero if all values are the same
+    if max_val == min_val:
+        return np.zeros_like(arr)  # Return all zeros (or could return ones)
+    
+    return (arr - min_val) / (max_val - min_val)
 
 def search_document(filepath, query_text):
     """
@@ -18,13 +39,33 @@ def search_document(filepath, query_text):
     filename = os.path.basename(filepath)
     client = initialize_chroma_client(db)
     collection = client.get_collection(filename)
-    
+
     query_embedding = get_embedding(query_text)
     results = collection.query(
         query_embeddings=[query_embedding], n_results=N_DOCS,
     )
 
-    return "".join(f"{i+1}. "+doc+"\n" for i, doc in enumerate(results["documents"][0])), collection.metadata.get("summary", "no summary generated")
+    test = collection.query(
+        query_embeddings=[query_embedding], n_results=collection.count(), include=["distances"]
+    )
+
+    print(test["ids"][:N_DOCS])
+
+    ids = np.array([int(i) for i in test["ids"][0]]) # get ids list (its sorted by score)
+    dists = np.array(test["distances"][0]) # sorted distances
+    #unsort to rerank
+    scores_semantic = min_max_normalize((1 - dists[np.argsort(ids)])) # get (1 - 1 - cosine) (to get max)
+    bm25R = BM25Retriever.load_json(file_path=os.path.abspath(filepath))
+    scores_bm25 = min_max_normalize(np.array(bm25R.score_query(query_text)))
+
+    hybrid_scores = ALPHA * scores_bm25 + (1 - ALPHA) * scores_semantic
+    ids = [str(i) for i in np.argsort(-hybrid_scores).tolist()[:N_DOCS]]
+
+    results = collection.get(ids=ids)
+    print(ids)
+    print(results)
+
+    return "".join(f"{i+1}. "+doc+"\n" for i, doc in enumerate(results["documents"])), collection.metadata.get("summary", "no summary generated")
 
 # defiend as well in processor.py - bad practice
 def get_embedding(text):

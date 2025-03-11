@@ -5,6 +5,7 @@ from lib.config import CHUNK_SIZE, OVERLAP, EMBEDDING_API_URL, EMBEDDING_MODEL
 from lib.db import initialize_chroma_client, get_or_create_collection
 from lib.summary import get_summary
 import lib.utils
+from lib.bm25 import BM25Retriever
 import lib.exception as exception
 
 def extract_markdown(filepath):
@@ -97,8 +98,13 @@ def process_document(filepath):
         print("No embeddings generated.")
         return
     
+    bm25Retriever = BM25Retriever()
+    bm25Retriever.fit(text_chunks)
+    
     collection.add(
         documents=text_chunks,
         embeddings=embeddings,
-        ids=[str(hash(chunk)) for chunk in text_chunks]
+        ids=[str(i) for i in range(len(text_chunks))]
     )
+
+    bm25Retriever.save_json(file_path=os.path.abspath(filepath))

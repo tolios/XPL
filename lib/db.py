@@ -49,7 +49,7 @@ def get_or_create_collection(client, collection_name):
             name=collection_name,
             metadata = {
                 "created": str(time.time()),
-                "hnsw:space": "l2",
+                "hnsw:space": "cosine",
                 "hnsw:construction_ef": 100,
                 "hnsw:search_ef": 100,
                 "hnsw:M": 16,                

@@ -4,6 +4,7 @@ import click
 import lib.processor
 import lib.config
 from lib.db import delete_collection, is_processed, db_exists_for_file, db_exists, list_dbs, list_collections
+from lib.bm25 import delete_bm25_collection
 from lib.query import answer_question
 from tabulate import tabulate
 import toml
@@ -22,6 +23,7 @@ def process(filename, delete):
         if delete:  
             try:
                 delete_collection(filename)
+                delete_bm25_collection(filename)
                 click.echo(f"Deleted embeddings for {filename}.")
             except Exception as e:
                 raise e

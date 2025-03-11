@@ -23,6 +23,9 @@ S_CHUNK_SIZE = config['summary']['chunk_size']
 S_OVERLAP = config['summary']['overlap'] 
 MAX_SUMMARY_LEN = config['summary']['max_summary_length']
 
+BM25_PATH = config['bm25']['bm25_path']
+ALPHA = config['bm25']['alpha']
+
 N_DOCS = config['query']['n_docs']
 
 LOGGING_LEVEL = config['logging']['level']

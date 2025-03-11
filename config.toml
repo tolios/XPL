@@ -12,12 +12,16 @@ chunk_size = 150  # Number of characters per chunk for embedding
 chroma_path = ".xplchroma"  # Directory to store all!
 
 [query]
-n_docs = 10
+n_docs = 20
 
 [summary]
 overlap = 50 # overlap between chunking of documents
 chunk_size = 3000  # Number of characters per chunk for rolling summary
 max_summary_length = 700 # max number of characters that the summary will be
+
+[bm25]
+bm25_path=".xplbm25"
+alpha=0.3 # if 0 cancels bm25 if 1 it cancels semantic!
 
 [logging]
 level = "INFO"  # Logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)

@@ -1,14 +1,12 @@
-import math
+import hashlib
+import os
 import json
+import math
+from nltk.stem import WordNetLemmatizer
+from nltk import pos_tag, word_tokenize
+from lib.config import BM25_PATH
 
-docs = [
-    "I am a dog",
-    "This is my cat's",
-    "who are you mr cat",
-    "I am running",
-    "i love cats"
-]
-
+lemmatizer = WordNetLemmatizer()
 
 maps = {
     "NN": "n",
@@ -32,18 +30,9 @@ maps = {
     "PRP": "n"
 }
 
-## nltk.download('wordnet')
-## nltk.download('punkt_tab')
-## nltk.download('averaged_perceptron_tagger_eng')
-
-from nltk.stem import WordNetLemmatizer
-from nltk import pos_tag, word_tokenize
-
 def clean(sentence):
     return [lemmatizer.lemmatize(word.lower(), maps.get(pos, "n")) for word, pos in pos_tag(word_tokenize(sentence))]
 
-
-lemmatizer = WordNetLemmatizer()
 class BM25Retriever:
 
     def __init__(self, b=0.75, k1=1.5):
@@ -84,7 +73,6 @@ class BM25Retriever:
         return tf*idf
     
     def score_query(self, query: str):
-
         clean_q = clean(query)
         # for all docs get the sum over terms
         scores = []
@@ -93,7 +81,7 @@ class BM25Retriever:
         
         return scores
 
-    def save_json(self, file_path="bm25_model.json"):
+    def save_json(self, file_path=""):
         """Save the BM25 model to a JSON file."""
         data = {
             "b": self.b,
@@ -103,13 +91,15 @@ class BM25Retriever:
             "df": self.df,
             "docs": self.docs,
         }
-        with open(file_path, "w") as f:
+        loc = hashlib.sha256(file_path.encode()).hexdigest()
+        with open(BM25_PATH+f"/{loc}.json", "w") as f:
             json.dump(data, f)
     
     @staticmethod
-    def load_json(file_path="bm25_model.json"):
+    def load_json(file_path=""):
         """Load a BM25 model from a JSON file."""
-        with open(file_path, "r") as f:
+        loc = hashlib.sha256(file_path.encode()).hexdigest()
+        with open(BM25_PATH+f"/{loc}.json", "r") as f:
             data = json.load(f)
         
         obj = BM25Retriever(b=data["b"], k1=data["k1"])
@@ -118,17 +108,9 @@ class BM25Retriever:
         obj.df = data["df"]
         obj.docs = data["docs"]
         return obj
+    
 
-
-# bm25 = BM25Retriever()
-# bm25.fit(docs)
-
-# print(bm25.score_query("i love cats"))
-
-# bm25.save_json()
-# del bm25
-
-loaded_bm25 = BM25Retriever.load_json()
-
-print(loaded_bm25.score_query("i love cats"))
+def delete_bm25_collection(filename):
+    loc = hashlib.sha256(os.path.abspath(filename).encode()).hexdigest()
+    os.remove(BM25_PATH+f"/{loc}.json")
 
